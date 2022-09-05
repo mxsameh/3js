@@ -2,6 +2,8 @@ import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
+import { RectAreaLightHelper } from 'three/examples/jsm/helpers/RectAreaLightHelper'
+
 
 /**
  * Base
@@ -18,21 +20,63 @@ const scene = new THREE.Scene()
 /**
  * Lights
  */
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
-scene.add(ambientLight)
 
-const pointLight = new THREE.PointLight(0xffffff, 0.5)
-pointLight.position.x = 2
-pointLight.position.y = 3
-pointLight.position.z = 4
-scene.add(pointLight)
+// ambient light
+const ambientLight = new THREE.AmbientLight('white',.2)
+// scene.add(ambientLight)
+gui.add(ambientLight,'intensity').min(0).max(1).step(.01)
+
+// directional light
+const directionalLight = new THREE.DirectionalLight('blue', .3);
+directionalLight.position.set(1, .25, 0);
+// scene.add(directionalLight);
+
+// hemisphere light
+const hemisphereLight = new THREE.HemisphereLight('red','blue',1)
+// scene.add(hemisphereLight)
+
+// point light
+const pointLight = new THREE.PointLight(0xff9000, .5, 4, 2)
+pointLight.position.set(1,-0.5,1)
+// scene.add(pointLight)
+
+// recarea light
+const rectAreaLight = new THREE.RectAreaLight(0x4e00ff,4, 4, 4)
+rectAreaLight.position.set(0,1,2)
+scene.add(rectAreaLight)
+
+// spot light
+const spotLight = new THREE.SpotLight(0x78ff00, .8, 7, Math.PI * .1, 0.25, .5)
+spotLight.position.set(0,0,2)
+// scene.add(spotLight)
+
+/**
+ * HELPERS
+ */
+const spotLightHelper = new THREE.SpotLightHelper(spotLight, 'red')
+scene.add(spotLightHelper)
+
+const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, .2)
+scene.add(directionalLightHelper)
+
+const rectAreaLightHelper = new RectAreaLightHelper(rectAreaLight)
+scene.add(rectAreaLightHelper)
+
+window.requestAnimationFrame(() => 
+{
+    rectAreaLightHelper.position.copy(rectAreaLight.position)
+    rectAreaLightHelper.quaternion.copy(rectAreaLight.quaternion)
+    rectAreaLightHelper.update()
+})
+
 
 /**
  * Objects
  */
+
 // Material
 const material = new THREE.MeshStandardMaterial()
-material.roughness = 0.4
+material.roughness = 0.4;
 
 // Objects
 const sphere = new THREE.Mesh(
