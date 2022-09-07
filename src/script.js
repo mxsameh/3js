@@ -2,8 +2,6 @@ import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
-import { RectAreaLightHelper } from 'three/examples/jsm/helpers/RectAreaLightHelper'
-
 
 /**
  * Base
@@ -18,92 +16,46 @@ const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 
 /**
+ * Textures
+ */
+const textureLoader = new THREE.TextureLoader()
+
+/**
+ * House
+ */
+// Temporary sphere
+const sphere = new THREE.Mesh(
+    new THREE.SphereBufferGeometry(1, 32, 32),
+    new THREE.MeshStandardMaterial({ roughness: 0.7 })
+)
+sphere.position.y = 1
+scene.add(sphere)
+
+// Floor
+const floor = new THREE.Mesh(
+    new THREE.PlaneBufferGeometry(20, 20),
+    new THREE.MeshStandardMaterial({ color: '#a9c388' })
+)
+floor.rotation.x = - Math.PI * 0.5
+floor.position.y = 0
+scene.add(floor)
+
+/**
  * Lights
  */
+// Ambient light
+const ambientLight = new THREE.AmbientLight('#ffffff', 0.5)
+gui.add(ambientLight, 'intensity').min(0).max(1).step(0.001)
+scene.add(ambientLight)
 
-// ambient light
-const ambientLight = new THREE.AmbientLight('white',.2)
-// scene.add(ambientLight)
-gui.add(ambientLight,'intensity').min(0).max(1).step(.01)
-
-// directional light
-const directionalLight = new THREE.DirectionalLight('blue', .3);
-directionalLight.position.set(1, .25, 0);
-// scene.add(directionalLight);
-
-// hemisphere light
-const hemisphereLight = new THREE.HemisphereLight('red','blue',1)
-// scene.add(hemisphereLight)
-
-// point light
-const pointLight = new THREE.PointLight(0xff9000, .5, 4, 2)
-pointLight.position.set(1,-0.5,1)
-// scene.add(pointLight)
-
-// recarea light
-const rectAreaLight = new THREE.RectAreaLight(0x4e00ff,4, 4, 4)
-rectAreaLight.position.set(0,1,2)
-scene.add(rectAreaLight)
-
-// spot light
-const spotLight = new THREE.SpotLight(0x78ff00, .8, 7, Math.PI * .1, 0.25, .5)
-spotLight.position.set(0,0,2)
-// scene.add(spotLight)
-
-/**
- * HELPERS
- */
-const spotLightHelper = new THREE.SpotLightHelper(spotLight, 'red')
-scene.add(spotLightHelper)
-
-const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, .2)
-scene.add(directionalLightHelper)
-
-const rectAreaLightHelper = new RectAreaLightHelper(rectAreaLight)
-scene.add(rectAreaLightHelper)
-
-window.requestAnimationFrame(() => 
-{
-    rectAreaLightHelper.position.copy(rectAreaLight.position)
-    rectAreaLightHelper.quaternion.copy(rectAreaLight.quaternion)
-    rectAreaLightHelper.update()
-})
-
-
-/**
- * Objects
- */
-
-// Material
-const material = new THREE.MeshStandardMaterial()
-material.roughness = 0.4;
-
-// Objects
-const sphere = new THREE.Mesh(
-    new THREE.SphereBufferGeometry(0.5, 32, 32),
-    material
-)
-sphere.position.x = - 1.5
-
-const cube = new THREE.Mesh(
-    new THREE.BoxBufferGeometry(0.75, 0.75, 0.75),
-    material
-)
-
-const torus = new THREE.Mesh(
-    new THREE.TorusBufferGeometry(0.3, 0.2, 32, 64),
-    material
-)
-torus.position.x = 1.5
-
-const plane = new THREE.Mesh(
-    new THREE.PlaneBufferGeometry(5, 5),
-    material
-)
-plane.rotation.x = - Math.PI * 0.5
-plane.position.y = - 0.65
-
-scene.add(sphere, cube, torus, plane)
+// Directional light
+const moonLight = new THREE.DirectionalLight('#ffffff', 0.5)
+moonLight.position.set(4, 5, - 2)
+gui.add(moonLight, 'intensity').min(0).max(1).step(0.001)
+gui.add(moonLight.position, 'x').min(- 5).max(5).step(0.001)
+gui.add(moonLight.position, 'y').min(- 5).max(5).step(0.001)
+gui.add(moonLight.position, 'z').min(- 5).max(5).step(0.001)
+scene.add(moonLight)
 
 /**
  * Sizes
@@ -133,9 +85,9 @@ window.addEventListener('resize', () =>
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.x = 1
-camera.position.y = 1
-camera.position.z = 2
+camera.position.x = 4
+camera.position.y = 2
+camera.position.z = 5
 scene.add(camera)
 
 // Controls
@@ -159,15 +111,6 @@ const clock = new THREE.Clock()
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
-
-    // Update objects
-    sphere.rotation.y = 0.1 * elapsedTime
-    cube.rotation.y = 0.1 * elapsedTime
-    torus.rotation.y = 0.1 * elapsedTime
-
-    sphere.rotation.x = 0.15 * elapsedTime
-    cube.rotation.x = 0.15 * elapsedTime
-    torus.rotation.x = 0.15 * elapsedTime
 
     // Update controls
     controls.update()
